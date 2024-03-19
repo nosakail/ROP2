@@ -20,6 +20,9 @@ impl From<std::io::Error> for SendEmailError {
 type SendEmailResult<T> = Result<T, SendEmailError>;
 
 
+
+
+
 pub fn send_content_by_email(file_path: &str, user_id: &str) -> SendEmailResult<String> {
     let data = read_file(file_path)?;
     let user_info = match user::find_by_id(user_id) {
@@ -37,6 +40,24 @@ fn read_file(file_path: &str) -> io::Result<String> {
 }
 
 
+fn get_user_info(user_id: &str) -> SendEmailResult<User> {
+
+    match user_id {
+        "1" => Ok(User {
+            id: "1".to_string(),
+            first_name: "John".to_string(),
+            last_name: "Doe".to_string(),
+            email_address: "john@example.com".to_string(),
+        }),
+        "2" => Ok(User {
+            id: "2".to_string(),
+            first_name: "Jane".to_string(),
+            last_name: "Doe".to_string(),
+            email_address: "jane@example.com".to_string(),
+        }),
+        _ => Err(SendEmailError::UserNotFoundError),
+    }
+}
 
 
 
