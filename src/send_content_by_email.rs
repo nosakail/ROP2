@@ -9,6 +9,7 @@ pub enum SendEmailError {
     IOError(io::Error),
     UserNotFoundError,
     InvalidEmailError,
+    InvalidUserInfoError(String),
 }
 
 impl From<std::io::Error> for SendEmailError {
@@ -17,8 +18,9 @@ impl From<std::io::Error> for SendEmailError {
     }
 }
 
-type SendEmailResult<T> = Result<T, SendEmailError>;
 
+
+type SendEmailResult<T> = Result<T, SendEmailError>;
 
 
 
@@ -40,35 +42,27 @@ fn read_file(file_path: &str) -> io::Result<String> {
 }
 
 
-fn get_user_info(user_id: &str) -> SendEmailResult<User> {
-
-    match user_id {
-        "1" => Ok(User {
-            id: "1".to_string(),
-            first_name: "John".to_string(),
-            last_name: "Doe".to_string(),
-            email_address: "john@example.com".to_string(),
-        }),
-        "2" => Ok(User {
-            id: "2".to_string(),
-            first_name: "Jane".to_string(),
-            last_name: "Doe".to_string(),
-            email_address: "jane@example.com".to_string(),
-        }),
-        _ => Err(SendEmailError::UserNotFoundError),
-    }
-}
-
-
-
 fn validate_user_info(user_info: &User) -> SendEmailResult<&User> {
-    
-    if user_info.email_address.contains('@') {
-        Ok(user_info)
-    } else {
-        Err(SendEmailError::InvalidEmailError)
+    if user_info.email_address.is_empty() || !user_info.email_address.contains('@') {
+        return Err(SendEmailError::InvalidEmailError);
     }
+
+    if user_info.first_name.is_empty() {
+        return Err(SendEmailError::InvalidUserInfoError("Prénom vide".to_string()));
+    }
+
+    if user_info.last_name.is_empty() {
+        return Err(SendEmailError::InvalidUserInfoError("Nom vide".to_string()));
+    }
+
+    if let Err(_) = user_info.id.parse::<i32>() {
+        return Err(SendEmailError::InvalidUserInfoError("ID invalide".to_string()));
+    }
+
+    Ok(user_info)
 }
+
+
 
 
 
